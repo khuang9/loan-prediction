@@ -108,6 +108,7 @@ def evaluate_model(model, X, y, model_name, dataset_name):
     return metrics
 
 df = pd.read_csv(DATA_PATH)
+rule_based_decision = df["rule_based_decision"]
 df = df[df['actual_outcome'] != 'ongoing'].drop(columns=["applicant_id", "days_to_default", "rule_based_decision"])
 df['actual_outcome'] = df['actual_outcome'].map({'defaulted': 1, 'repaid': 0})
 a = df["stated_monthly_income"]
@@ -327,3 +328,22 @@ results_df = pd.DataFrame(results)
 
 print("\nFinal Model Comparison:")
 print(results_df.round(4).to_string(index=False))
+
+# Map baseline decisions
+map_base = {
+    "approved": 0,
+    "denied": 1,
+    "flagged_for_review": 0
+}
+
+# Convert categorical values to binary
+rule_based_test = rule_based_decision.loc[y_test.index]
+y_pred_baseline = rule_based_test.map(map_base)
+
+# Classification report
+print("\nClassification Report:")
+print(classification_report(
+    y_test,
+    y_pred_baseline,
+    target_names=["Repaid", "Defaulted"]
+))
