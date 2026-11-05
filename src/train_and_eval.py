@@ -30,6 +30,11 @@ from sklearn.metrics import (
     classification_report
 )
 
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+DATA_PATH = BASE_DIR / "data" / "loan_applications.csv"
+
 def evaluate_model(model, X, y, model_name, dataset_name):
     import numpy as np
     # Make predictions
@@ -102,7 +107,7 @@ def evaluate_model(model, X, y, model_name, dataset_name):
 
     return metrics
 
-df = pd.read_csv('loan_applications.csv')
+df = pd.read_csv(DATA_PATH)
 df = df[df['actual_outcome'] != 'ongoing'].drop(columns=["applicant_id", "days_to_default", "rule_based_decision"])
 df['actual_outcome'] = df['actual_outcome'].map({'defaulted': 1, 'repaid': 0})
 a = df["stated_monthly_income"]
@@ -180,6 +185,21 @@ rf_model = Pipeline([
     ))
 ])
 
+# XGBoost pipeline
+xgb_model = Pipeline([
+    ("preprocessor", preprocessor),
+    ("classifier", XGBClassifier(
+        n_estimators=300,
+        max_depth=3,
+        min_child_weight=5,
+        reg_alpha=0.5,
+        reg_lambda=5,
+        learning_rate=0.05,
+        random_state=42,
+        eval_metric="logloss"
+    ))
+])
+
 # Neural Network pipeline
 nn_model = Pipeline([
     ("preprocessor", preprocessor),
@@ -221,6 +241,11 @@ rf_scores = cross_val_score(
     cv=cv, scoring="roc_auc"
 )
 
+xgb_scores = cross_val_score(
+    xgb_model, X_train, y_train,
+    cv=cv, scoring="roc_auc"
+)
+
 nn_scores = cross_val_score(
     nn_model, X_train, y_train,
     cv=cv, scoring="roc_auc"
@@ -228,11 +253,13 @@ nn_scores = cross_val_score(
 
 print("Logistic Regression:", lr_scores.mean())
 print("Random Forest:", rf_scores.mean())
+print("XGBoost:", xgb_scores.mean())
 print("Neural Net:", nn_scores.mean())
 
 # Fit final models
 lr_model.fit(X_train, y_train)
 rf_model.fit(X_train, y_train)
+xgb_model.fit(X_train, y_train)
 nn_model.fit(X_train, y_train, classifier__sample_weight=sample_weights)
 
 results = []
@@ -263,6 +290,21 @@ results.append(
     evaluate_model(
         rf_model, X_test, y_test,
         "Random Forest", "Testing"
+    )
+)
+
+# XGBoost
+results.append(
+    evaluate_model(
+        xgb_model, X_train, y_train,
+        "XGBoost", "Training"
+    )
+)
+
+results.append(
+    evaluate_model(
+        xgb_model, X_test, y_test,
+        "XGBoost", "Testing"
     )
 )
 
