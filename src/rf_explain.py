@@ -11,7 +11,7 @@ from metrics import build_f2_scorer
 from train_and_eval import Data, ClassifierTrainer, fairness_analysis
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-DATA_PATH = BASE_DIR / "data" / "loan_applications_no_self_employed.csv"
+DATA_PATH = BASE_DIR / "data" / "loan_applications.csv"
 
 MODEL_THRESHOLD = 0.5
 
