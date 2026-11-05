@@ -104,49 +104,50 @@ plt.ylim(0, 100)
 plt.legend(title="Model")
 plt.tight_layout()
 plt.show()
-# # Generate SHAP values
-# shap_values = rf_model.explain_shap(
-#     background_size=100,
-#     explain_size=200
-# )
 
-# # Global feature importance
-# rf_model.plot_shap_bar()
+# Generate SHAP values
+shap_values = rf_model.explain_shap(
+    background_size=100,
+    explain_size=200
+)
 
-# # Global feature impact
-# rf_model.plot_shap_summary()
+# Global feature importance
+rf_model.plot_shap_bar()
 
-# # Explain an individual prediction
-# rf_model.plot_shap_waterfall(observation=0)
+# Global feature impact
+rf_model.plot_shap_summary()
 
-# # Feature dependence
-# rf_model.plot_shap_dependence("loan_amount")
+# Explain an individual prediction
+rf_model.plot_shap_waterfall(observation=0)
+
+# Feature dependence
+rf_model.plot_shap_dependence("loan_amount")
 
 
-# import matplotlib.pyplot as plt
-# from sklearn.tree import plot_tree
-# plt.figure(figsize=(20, 10))
+import matplotlib.pyplot as plt
+from sklearn.tree import plot_tree
+plt.figure(figsize=(20, 10))
 
-# tree = rf_model.get_model()
-# while True:
-#     if hasattr(tree, "best_estimator_"):
-#         tree = tree.best_estimator_
-#     elif hasattr(tree, "estimator_"):
-#         tree = tree.estimator_
-#     elif hasattr(tree, "estimator"):
-#             tree = tree.estimator
-#     else:
-#         break
-# tree = tree.named_steps['classifier']
+tree = rf_model.get_model()
+while True:
+    if hasattr(tree, "best_estimator_"):
+        tree = tree.best_estimator_
+    elif hasattr(tree, "estimator_"):
+        tree = tree.estimator_
+    elif hasattr(tree, "estimator"):
+            tree = tree.estimator
+    else:
+        break
+tree = tree.named_steps['classifier']
 
-# plot_tree(
-#     tree.estimators_[0],
-#     feature_names=data.X_train.columns,
-#     class_names=["repaid", "defaulted"],
-#     filled=True,
-#     rounded=True,
-#     fontsize=10
-# )
+plot_tree(
+    tree.estimators_[0],
+    feature_names=data.X_train.columns,
+    class_names=["repaid", "defaulted"],
+    filled=True,
+    rounded=True,
+    fontsize=10
+)
 
-# plt.title("Decision Tree 1 from Random Forest")
-# plt.show()
+plt.title("Decision Tree 1 from Random Forest")
+plt.show()
